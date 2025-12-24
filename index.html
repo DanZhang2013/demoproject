@@ -4,19 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>剪刀石头布</title>
+  <!-- 样式定义：使用 CSS 变量和现代布局技术实现游戏界面 -->
   <style>
+    /* CSS 变量定义：统一管理颜色主题，便于维护和修改 */
     :root {
-      --bg: #0f172a;
-      --card: #111827;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #22c55e;
-      --danger: #ef4444;
-      --warn: #f59e0b;
-      --btn: #1f2937;
-      --btn-hover: #374151;
+      --bg: #0f172a;           /* 深色背景 */
+      --card: #111827;         /* 卡片背景 */
+      --text: #e5e7eb;         /* 主文字颜色 */
+      --muted: #9ca3af;        /* 次要文字颜色 */
+      --accent: #22c55e;       /* 成功/获胜颜色（绿色） */
+      --danger: #ef4444;       /* 失败/失败颜色（红色） */
+      --warn: #f59e0b;         /* 警告/平局颜色（橙色） */
+      --btn: #1f2937;          /* 按钮背景 */
+      --btn-hover: #374151;    /* 按钮悬停背景 */
     }
+    /* 全局盒模型设置 */
     * { box-sizing: border-box; }
+    
+    /* 页面主体样式：使用 Grid 布局实现垂直水平居中 */
     body {
       margin: 0;
       min-height: 100vh;
@@ -26,11 +31,15 @@
       color: var(--text);
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
     }
+    
+    /* 主容器：限制最大宽度，适应各种屏幕 */
     .container {
       width: 100%;
       max-width: 680px;
       padding: 24px;
     }
+    
+    /* 卡片样式：使用渐变和半透明效果，实现玻璃态视觉效果 */
     .card {
       background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.08);
@@ -39,21 +48,29 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.35);
       backdrop-filter: blur(6px);
     }
+    
+    /* 标题样式 */
     h1 {
       margin: 0 0 8px;
       font-size: 28px;
       letter-spacing: 0.5px;
     }
+    
+    /* 副标题样式：使用较浅的颜色 */
     .subtitle {
       color: var(--muted);
       margin-bottom: 20px;
     }
+    
+    /* 记分牌布局：使用 Grid 两列布局 */
     .scoreboard {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-bottom: 16px;
     }
+    
+    /* 单个分数显示区域：使用 Flexbox 实现标签和分数的两端对齐 */
     .score {
       background: var(--card);
       border: 1px solid rgba(255,255,255,0.06);
@@ -63,17 +80,23 @@
       align-items: center;
       justify-content: space-between;
     }
+    
+    /* 分数标签和数字样式 */
     .score span.label { color: var(--muted); }
     .score strong {
       font-size: 20px;
       letter-spacing: 0.5px;
     }
+    
+    /* 选择按钮区域：使用 Grid 三列布局显示三个选项 */
     .choices {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       margin: 18px 0;
     }
+    
+    /* 选择按钮样式：包含悬停和点击动画效果 */
     button.choice {
       background: var(--btn);
       border: 1px solid rgba(255,255,255,0.08);
@@ -87,9 +110,17 @@
       place-items: center;
       gap: 6px;
     }
+    
+    /* 按钮悬停效果：改变背景色并向上移动 */
     button.choice:hover { background: var(--btn-hover); transform: translateY(-1px); }
+    
+    /* 按钮点击效果：恢复原位置 */
     button.choice:active { transform: translateY(0); }
+    
+    /* 表情符号大小 */
     .emoji { font-size: 26px; }
+    
+    /* 结果显示区域 */
     .result {
       margin-top: 16px;
       background: var(--card);
@@ -97,18 +128,28 @@
       border-radius: 12px;
       padding: 16px;
     }
+    
+    /* 结果信息行：使用 Flexbox 实现左右对齐 */
     .line { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--muted); }
+    
+    /* 胜负结果文字样式 */
     .winner {
       margin-top: 8px;
       font-size: 18px;
       font-weight: 600;
     }
-    .winner.win { color: var(--accent); }
-    .winner.lose { color: var(--danger); }
-    .winner.draw { color: var(--warn); }
+    
+    /* 不同结果对应的颜色 */
+    .winner.win { color: var(--accent); }   /* 获胜：绿色 */
+    .winner.lose { color: var(--danger); }  /* 失败：红色 */
+    .winner.draw { color: var(--warn); }    /* 平局：橙色 */
+    
+    /* 操作按钮区域 */
     .actions {
       display: flex; gap: 10px; margin-top: 16px;
     }
+    
+    /* 次要按钮样式：透明背景带边框 */
     .secondary {
       background: transparent;
       color: var(--text);
@@ -117,7 +158,11 @@
       padding: 10px 14px;
       cursor: pointer;
     }
+    
+    /* 次要按钮悬停效果：边框变亮 */
     .secondary:hover { border-color: rgba(255,255,255,0.28); }
+    
+    /* 响应式设计：小屏幕适配 */
     @media (max-width: 520px) {
       .choices { grid-template-columns: 1fr 1fr; }
       .scoreboard { grid-template-columns: 1fr; }
@@ -125,16 +170,21 @@
   </style>
 </head>
 <body>
+  <!-- 主容器 -->
   <div class="container">
+    <!-- 游戏卡片 -->
     <div class="card">
+      <!-- 游戏标题和说明 -->
       <h1>剪刀 · 石头 · 布</h1>
       <div class="subtitle">选一个出拳，看看你或电脑谁更强！先到 5 分获胜。</div>
 
+      <!-- 记分牌：显示玩家和电脑的得分 -->
       <div class="scoreboard">
         <div class="score"><span class="label">你</span><strong id="playerScore">0</strong></div>
         <div class="score"><span class="label">电脑</span><strong id="cpuScore">0</strong></div>
       </div>
 
+      <!-- 三个选择按钮：剪刀、石头、布 -->
       <div class="choices">
         <button class="choice" data-choice="剪刀">
           <div class="emoji">✂️</div>
@@ -150,10 +200,13 @@
         </button>
       </div>
 
+      <!-- 结果显示区域 -->
       <div class="result">
         <div class="line"><span>你的选择</span><strong id="playerPick">—</strong></div>
         <div class="line"><span>电脑的选择</span><strong id="cpuPick">—</strong></div>
         <div id="winnerText" class="winner draw">开始吧！</div>
+        
+        <!-- 操作按钮：重置和切换规则 -->
         <div class="actions">
           <button id="reset" class="secondary">重置比分</button>
           <button id="bestOf" class="secondary">改为 3 局 2 胜</button>
@@ -162,59 +215,100 @@
     </div>
   </div>
 
+  <!-- JavaScript 游戏逻辑 -->
   <script>
-    // 游戏状态
+    // ========== 游戏配置和状态 ==========
+    
+    // 游戏选项：三种可选出拳
     const choices = ["剪刀", "石头", "布"];
+    
+    // 胜负关系映射：定义每种出拳能战胜的对手
+    // 例如：剪刀战胜布，石头战胜剪刀，布战胜石头
     const beats = { "剪刀": "布", "石头": "剪刀", "布": "石头" };
 
+    // 玩家和电脑的当前得分
     let playerScore = 0;
     let cpuScore = 0;
+    
+    // 目标分数：先达到此分数的一方获胜（默认 5 分）
     let targetScore = 5; // 先到 5 分
 
-    // DOM
-    const playerScoreEl = document.getElementById("playerScore");
-    const cpuScoreEl = document.getElementById("cpuScore");
-    const playerPickEl = document.getElementById("playerPick");
-    const cpuPickEl = document.getElementById("cpuPick");
-    const winnerTextEl = document.getElementById("winnerText");
-    const resetBtn = document.getElementById("reset");
-    const bestOfBtn = document.getElementById("bestOf");
+    // ========== DOM 元素引用 ==========
+    // 获取页面中需要操作的元素，用于更新显示内容
+    const playerScoreEl = document.getElementById("playerScore");  // 玩家分数显示
+    const cpuScoreEl = document.getElementById("cpuScore");        // 电脑分数显示
+    const playerPickEl = document.getElementById("playerPick");    // 玩家选择显示
+    const cpuPickEl = document.getElementById("cpuPick");          // 电脑选择显示
+    const winnerTextEl = document.getElementById("winnerText");    // 胜负结果文字
+    const resetBtn = document.getElementById("reset");             // 重置按钮
+    const bestOfBtn = document.getElementById("bestOf");           // 规则切换按钮
 
-    // 绑定选择按钮
+    // ========== 事件绑定 ==========
+    
+    // 给所有选择按钮绑定点击事件
+    // 点击后触发一局游戏，传入玩家的选择
     document.querySelectorAll("button.choice").forEach(btn => {
       btn.addEventListener("click", () => playRound(btn.dataset.choice));
     });
 
-    // 一局游戏逻辑
+    // ========== 游戏核心逻辑 ==========
+    
+    /**
+     * 进行一局游戏
+     * @param {string} playerPick - 玩家的选择（剪刀/石头/布）
+     */
     function playRound(playerPick) {
+      // 如果游戏已结束（任一方达到目标分数），不再继续
       if (playerScore >= targetScore || cpuScore >= targetScore) return;
 
+      // 电脑随机选择
       const cpuPick = randomPick();
+      
+      // 显示双方选择
       playerPickEl.textContent = withEmoji(playerPick);
       cpuPickEl.textContent = withEmoji(cpuPick);
 
+      // 判定胜负
       const outcome = judge(playerPick, cpuPick);
+      
+      // 更新比分
       updateScores(outcome);
+      
+      // 显示本局结果
       renderOutcome(outcome);
 
+      // 检查是否有一方达到目标分数，如有则显示最终结果
       if (playerScore >= targetScore || cpuScore >= targetScore) {
         finalMessage();
       }
     }
 
-    // 随机选择
+    /**
+     * 电脑随机选择一个出拳
+     * @returns {string} 随机选择的出拳（剪刀/石头/布）
+     */
     function randomPick() {
       const idx = Math.floor(Math.random() * choices.length);
       return choices[idx];
     }
 
-    // 裁判
+    /**
+     * 判定胜负
+     * @param {string} a - 玩家的选择
+     * @param {string} b - 电脑的选择
+     * @returns {string} 结果："win"（获胜）、"lose"（失败）或 "draw"（平局）
+     */
     function judge(a, b) {
-      if (a === b) return "draw";
-      return beats[a] === b ? "win" : "lose";
+      if (a === b) return "draw";  // 相同则平局
+      return beats[a] === b ? "win" : "lose";  // 检查玩家的选择是否能战胜电脑
     }
 
-    // 更新比分
+    // ========== 界面更新函数 ==========
+    
+    /**
+     * 更新双方得分
+     * @param {string} outcome - 本局结果（win/lose/draw）
+     */
     function updateScores(outcome) {
       if (outcome === "win") playerScore++;
       if (outcome === "lose") cpuScore++;
@@ -222,27 +316,46 @@
       cpuScoreEl.textContent = cpuScore;
     }
 
-    // 显示结果
+    /**
+     * 显示本局结果文字和颜色
+     * @param {string} outcome - 本局结果（win/lose/draw）
+     */
     function renderOutcome(outcome) {
+      // 移除之前的所有状态类
       winnerTextEl.classList.remove("win", "lose", "draw");
+      
+      // 添加当前状态对应的类（改变颜色）
       winnerTextEl.classList.add(outcome);
+      
+      // 根据结果显示不同的文字
       const text = outcome === "win" ? "你赢了一局！"
                  : outcome === "lose" ? "你输了一局。"
                  : "平局。";
       winnerTextEl.textContent = text;
     }
 
-    // 终局信息
+    /**
+     * 显示最终游戏结束信息
+     * 当任一方达到目标分数时调用
+     */
     function finalMessage() {
-      const youWin = playerScore > cpuScore;
+      const youWin = playerScore > cpuScore;  // 判断玩家是否获胜
+      
+      // 更新样式
       winnerTextEl.classList.remove("win", "lose", "draw");
       winnerTextEl.classList.add(youWin ? "win" : "lose");
+      
+      // 显示最终结果文字
       winnerTextEl.textContent = youWin
         ? `恭喜！你以 ${playerScore} 比 ${cpuScore} 获胜 🎉`
         : `这次电脑以 ${cpuScore} 比 ${playerScore} 获胜，再试试？`;
     }
 
-    // 重置
+    // ========== 按钮事件处理 ==========
+    
+    /**
+     * 重置按钮：清空所有得分和选择，重新开始游戏
+     */
     resetBtn.addEventListener("click", () => {
       playerScore = 0;
       cpuScore = 0;
@@ -255,7 +368,9 @@
       winnerTextEl.classList.add("draw");
     });
 
-    // 切换局数
+    /**
+     * 规则切换按钮：在"先到 5 分"和"3 局 2 胜"之间切换
+     */
     bestOfBtn.addEventListener("click", () => {
       // 在 5 分和 2 分（3 局 2 胜）之间切换
       targetScore = targetScore === 5 ? 2 : 5;
@@ -263,7 +378,13 @@
       resetBtn.click(); // 切换后重置比分
     });
 
-    // 辅助：给文字加上对应 emoji
+    // ========== 辅助函数 ==========
+    
+    /**
+     * 给文字加上对应的 emoji 表情
+     * @param {string} choice - 选择（剪刀/石头/布）
+     * @returns {string} 带表情的文字（如 "✂️ 剪刀"）
+     */
     function withEmoji(choice) {
       const map = { "剪刀": "✂️ 剪刀", "石头": "🪨 石头", "布": "🧻 布" };
       return map[choice] || choice;
