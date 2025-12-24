@@ -81,7 +81,7 @@ function printGameResult(gameResult) {
 }
 
 // 导出函数供其他模块使用
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports = {
         ROCK,
         PAPER,
@@ -94,7 +94,7 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // 示例用法
-if (require.main === module) {
+if (typeof require !== 'undefined' && require.main === module) {
     console.log('欢迎来到剪刀石头布游戏！');
     console.log('可选择：石头、布、剪刀');
     console.log('');
