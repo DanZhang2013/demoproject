@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>剪刀石头布</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #22c55e;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --btn: #1f2937;
+      --btn-hover: #374151;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(1200px 600px at 50% -100px, #1f2937, var(--bg));
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .container {
+      width: 100%;
+      max-width: 680px;
+      padding: 24px;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      backdrop-filter: blur(6px);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: 0.5px;
+    }
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .score {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .score span.label { color: var(--muted); }
+    .score strong {
+      font-size: 20px;
+      letter-spacing: 0.5px;
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+    button.choice {
+      background: var(--btn);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 14px 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.06s ease, background 0.2s ease, border-color 0.2s ease;
+      display: grid;
+      place-items: center;
+      gap: 6px;
+    }
+    button.choice:hover { background: var(--btn-hover); transform: translateY(-1px); }
+    button.choice:active { transform: translateY(0); }
+    .emoji { font-size: 26px; }
+    .result {
+      margin-top: 16px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .line { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--muted); }
+    .winner {
+      margin-top: 8px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .winner.win { color: var(--accent); }
+    .winner.lose { color: var(--danger); }
+    .winner.draw { color: var(--warn); }
+    .actions {
+      display: flex; gap: 10px; margin-top: 16px;
+    }
+    .secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    .secondary:hover { border-color: rgba(255,255,255,0.28); }
+    @media (max-width: 520px) {
+      .choices { grid-template-columns: 1fr 1fr; }
+      .scoreboard { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>剪刀 · 石头 · 布</h1>
+      <div class="subtitle">选一个出拳，看看你或电脑谁更强！先到 5 分获胜。</div>
+
+      <div class="scoreboard">
+        <div class="score"><span class="label">你</span><strong id="playerScore">0</strong></div>
+        <div class="score"><span class="label">电脑</span><strong id="cpuScore">0</strong></div>
+      </div>
+
+      <div class="choices">
+        <button class="choice" data-choice="剪刀">
+          <div class="emoji">✂️</div>
+          <div>剪刀</div>
+        </button>
+        <button class="choice" data-choice="石头">
+          <div class="emoji">🪨</div>
+          <div>石头</div>
+        </button>
+        <button class="choice" data-choice="布">
+          <div class="emoji">🧻</div>
+          <div>布</div>
+        </button>
+      </div>
+
+      <div class="result">
+        <div class="line"><span>你的选择</span><strong id="playerPick">—</strong></div>
+        <div class="line"><span>电脑的选择</span><strong id="cpuPick">—</strong></div>
+        <div id="winnerText" class="winner draw">开始吧！</div>
+        <div class="actions">
+          <button id="reset" class="secondary">重置比分</button>
+          <button id="bestOf" class="secondary">改为 3 局 2 胜</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 游戏状态
+    const choices = ["剪刀", "石头", "布"];
+    const beats = { "剪刀": "布", "石头": "剪刀", "布": "石头" };
+
+    let playerScore = 0;
+    let cpuScore = 0;
+    let targetScore = 5; // 先到 5 分
+
+    // DOM
+    const playerScoreEl = document.getElementById("playerScore");
+    const cpuScoreEl = document.getElementById("cpuScore");
+    const playerPickEl = document.getElementById("playerPick");
+    const cpuPickEl = document.getElementById("cpuPick");
+    const winnerTextEl = document.getElementById("winnerText");
+    const resetBtn = document.getElementById("reset");
+    const bestOfBtn = document.getElementById("bestOf");
+
+    // 绑定选择按钮
+    document.querySelectorAll("button.choice").forEach(btn => {
+      btn.addEventListener("click", () => playRound(btn.dataset.choice));
+    });
+
+    // 一局游戏逻辑
+    function playRound(playerPick) {
+      if (playerScore >= targetScore || cpuScore >= targetScore) return;
+
+      const cpuPick = randomPick();
+      playerPickEl.textContent = withEmoji(playerPick);
+      cpuPickEl.textContent = withEmoji(cpuPick);
+
+      const outcome = judge(playerPick, cpuPick);
+      updateScores(outcome);
+      renderOutcome(outcome);
+
+      if (playerScore >= targetScore || cpuScore >= targetScore) {
+        finalMessage();
+      }
+    }
+
+    // 随机选择
+    function randomPick() {
+      const idx = Math.floor(Math.random() * choices.length);
+      return choices[idx];
+    }
+
+    // 裁判
+    function judge(a, b) {
+      if (a === b) return "draw";
+      return beats[a] === b ? "win" : "lose";
+    }
+
+    // 更新比分
+    function updateScores(outcome) {
+      if (outcome === "win") playerScore++;
+      if (outcome === "lose") cpuScore++;
+      playerScoreEl.textContent = playerScore;
+      cpuScoreEl.textContent = cpuScore;
+    }
+
+    // 显示结果
+    function renderOutcome(outcome) {
+      winnerTextEl.classList.remove("win", "lose", "draw");
+      winnerTextEl.classList.add(outcome);
+      const text = outcome === "win" ? "你赢了一局！"
+                 : outcome === "lose" ? "你输了一局。"
+                 : "平局。";
+      winnerTextEl.textContent = text;
+    }
+
+    // 终局信息
+    function finalMessage() {
+      const youWin = playerScore > cpuScore;
+      winnerTextEl.classList.remove("win", "lose", "draw");
+      winnerTextEl.classList.add(youWin ? "win" : "lose");
+      winnerTextEl.textContent = youWin
+        ? `恭喜！你以 ${playerScore} 比 ${cpuScore} 获胜 🎉`
+        : `这次电脑以 ${cpuScore} 比 ${playerScore} 获胜，再试试？`;
+    }
+
+    // 重置
+    resetBtn.addEventListener("click", () => {
+      playerScore = 0;
+      cpuScore = 0;
+      playerScoreEl.textContent = "0";
+      cpuScoreEl.textContent = "0";
+      playerPickEl.textContent = "—";
+      cpuPickEl.textContent = "—";
+      winnerTextEl.textContent = "开始吧！";
+      winnerTextEl.classList.remove("win", "lose", "draw");
+      winnerTextEl.classList.add("draw");
+    });
+
+    // 切换局数
+    bestOfBtn.addEventListener("click", () => {
+      // 在 5 分和 2 分（3 局 2 胜）之间切换
+      targetScore = targetScore === 5 ? 2 : 5;
+      bestOfBtn.textContent = targetScore === 2 ? "改回 先到 5 分" : "改为 3 局 2 胜";
+      resetBtn.click(); // 切换后重置比分
+    });
+
+    // 辅助：给文字加上对应 emoji
+    function withEmoji(choice) {
+      const map = { "剪刀": "✂️ 剪刀", "石头": "🪨 石头", "布": "🧻 布" };
+      return map[choice] || choice;
+    }
+  </script>
+</body>
+</html>
